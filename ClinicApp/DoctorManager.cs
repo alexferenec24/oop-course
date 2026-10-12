@@ -1,5 +1,5 @@
 ﻿using System;
-using ClinicApp;
+namespace ClinicApp;
 
 public class DoctorManager
 {
@@ -72,6 +72,15 @@ public class DoctorManager
             copy[i] = _doctors[i];
         }
         return copy;
+    }
+    // Індексатор: clinic.Doctors[1]
+    public Doctor? this[int index]
+    {
+        get
+        {
+            if (index < 0 || index >= _count) return null;
+            return _doctors[index];
+        }
     }
 
     public bool Remove(int id)

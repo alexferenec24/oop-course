@@ -1,5 +1,4 @@
 ﻿using System;
-using ClinicApp;
 
 namespace ClinicApp
 {
@@ -13,15 +12,10 @@ namespace ClinicApp
         public Specialty Specialty { get; set; }
         public string LicenseNumber { get; set; }
         public string Phone { get; set; }
-
-        // Пункт 5 підказок: одне поле типу WorkSchedule
         public WorkSchedule Schedule { get; set; }
 
         public string FullName => $"{FirstName} {LastName}";
-
-        // Тепер уся логіка живе в WorkSchedule
         public int WorkingHoursPerDay => Schedule.HoursPerDay;
-
         public bool IsAvailableNow => Schedule.IsNow;
 
         public Doctor()
@@ -36,15 +30,8 @@ namespace ClinicApp
 
         public Doctor(string firstName, string lastName, Specialty specialty,
                       string licenseNumber, string phone)
+            : this(firstName, lastName, specialty, licenseNumber, phone, new WorkSchedule(8, 17))
         {
-            Id = _nextId++;
-            FirstName = firstName;
-            LastName = lastName;
-            Specialty = specialty;
-            LicenseNumber = licenseNumber;
-            Phone = phone;
-            // Стандартний розклад, як був раніше: 8–17
-            Schedule = new WorkSchedule(8, 17);
         }
 
         public Doctor(string firstName, string lastName, Specialty specialty,
@@ -59,16 +46,17 @@ namespace ClinicApp
             Schedule = schedule;
         }
 
-        // Пункт 5: CanAcceptAt тепер просто делегує до Schedule.Contains
         public bool CanAcceptAt(int hour)
         {
             return Schedule.Contains(hour);
         }
 
+        // Пункт 6: ToString тепер через ClinicFormatter
         public override string ToString()
         {
             string status = IsAvailableNow ? "доступний" : "недоступний";
-            return $"[{Id}] {FullName} | {Specialty} | {LicenseNumber} | Тел: {Phone} | {Schedule} | {status}";
+            return $"[{Id}] {FullName} | {ClinicFormatter.FormatSpecialty(Specialty)} | {LicenseNumber} | "
+                 + $"Тел: {ClinicFormatter.FormatPhone(Phone)} | {Schedule} | {status}";
         }
     }
 }
