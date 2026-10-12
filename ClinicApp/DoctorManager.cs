@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace ClinicApp;
 
 public class DoctorManager
@@ -35,7 +36,20 @@ public class DoctorManager
         return null;
     }
 
-    // Пункт 8 підказок: порівнюємо текстовий запит із текстовим поданням enum
+    // Паттерн TryXxx: bool + out
+    public bool TryFindById(int id, out Doctor doctor)
+    {
+        Doctor? found = FindById(id);
+        if (found != null)
+        {
+            doctor = found;
+            return true;
+        }
+        doctor = null;
+        return false;
+    }
+
+    // Перевантаження 1: пошук за частиною рядка
     public Doctor[] FindBySpecialty(string specialty)
     {
         string lowerQuery = specialty.ToLower();
@@ -64,6 +78,31 @@ public class DoctorManager
         return result;
     }
 
+    // Перевантаження 2: точне співпадіння enum
+    public Doctor[] FindBySpecialty(Specialty specialty)
+    {
+        int matches = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (_doctors[i].Specialty == specialty)
+            {
+                matches++;
+            }
+        }
+
+        Doctor[] result = new Doctor[matches];
+        int index = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (_doctors[i].Specialty == specialty)
+            {
+                result[index] = _doctors[i];
+                index++;
+            }
+        }
+        return result;
+    }
+
     public Doctor[] GetAll()
     {
         Doctor[] copy = new Doctor[_count];
@@ -73,6 +112,7 @@ public class DoctorManager
         }
         return copy;
     }
+
     // Індексатор: clinic.Doctors[1]
     public Doctor? this[int index]
     {

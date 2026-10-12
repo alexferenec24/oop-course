@@ -1,5 +1,7 @@
 ﻿using System;
+
 namespace ClinicApp;
+
 public class AppointmentManager
 {
     private const int MaxAppointments = 500;
@@ -18,8 +20,8 @@ public class AppointmentManager
 
     public bool Book(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30)
     {
-        Patient patient = _patients.FindById(patientId);
-        Doctor doctor = _doctors.FindById(doctorId);
+        Patient? patient = _patients.FindById(patientId);
+        Doctor? doctor = _doctors.FindById(doctorId);
 
         if (patient == null)
         {
@@ -58,6 +60,7 @@ public class AppointmentManager
         }
         return null;
     }
+
     // Індексатор: clinic.Appointments[2]
     public Appointment? this[int index]
     {
@@ -70,7 +73,7 @@ public class AppointmentManager
 
     public bool Cancel(int id, string reason = "")
     {
-        Appointment appointment = FindById(id);
+        Appointment? appointment = FindById(id);
         if (appointment != null)
         {
             return appointment.Cancel(reason);
@@ -80,7 +83,7 @@ public class AppointmentManager
 
     public bool Complete(int id)
     {
-        Appointment appointment = FindById(id);
+        Appointment? appointment = FindById(id);
         if (appointment != null)
         {
             return appointment.Complete();
@@ -130,6 +133,7 @@ public class AppointmentManager
         return result;
     }
 
+    // Перевантаження 1: за DateTime
     public Appointment[] GetByDate(DateTime date)
     {
         int matches = 0;
@@ -149,6 +153,12 @@ public class AppointmentManager
             }
         }
         return result;
+    }
+
+    // Перевантаження 2: три числа — не дублює логіку, а конструює DateTime
+    public Appointment[] GetByDate(int year, int month, int day)
+    {
+        return GetByDate(new DateTime(year, month, day));
     }
 
     public Appointment[] GetUpcoming()
@@ -172,10 +182,20 @@ public class AppointmentManager
         return result;
     }
 
+    public Appointment[] GetAll()
+    {
+        Appointment[] copy = new Appointment[_count];
+        for (int i = 0; i < _count; i++)
+        {
+            copy[i] = _appointments[i];
+        }
+        return copy;
+    }
+
     public void DisplayAppointment(Appointment appointment)
     {
-        Patient patient = _patients.FindById(appointment.PatientId);
-        Doctor doctor = _doctors.FindById(appointment.DoctorId);
+        Patient? patient = _patients.FindById(appointment.PatientId);
+        Doctor? doctor = _doctors.FindById(appointment.DoctorId);
 
         string patientName = patient != null ? patient.FullName : $"Пацієнт #{appointment.PatientId}";
         string doctorName = doctor != null ? doctor.FullName : $"Лікар #{appointment.DoctorId}";

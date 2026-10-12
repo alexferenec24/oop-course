@@ -1,5 +1,7 @@
 ﻿using System;
+
 namespace ClinicApp;
+
 public class PatientManager
 {
     private const int MaxPatients = 100;
@@ -34,6 +36,19 @@ public class PatientManager
         return null;
     }
 
+    // Паттерн TryXxx: bool + out
+    public bool TryFindById(int id, out Patient patient)
+    {
+        Patient? found = FindById(id);
+        if (found != null)
+        {
+            patient = found;
+            return true;
+        }
+        patient = null;
+        return false;
+    }
+
     public Patient[] FindByName(string query)
     {
         int matches = 0;
@@ -41,7 +56,7 @@ public class PatientManager
 
         for (int i = 0; i < _count; i++)
         {
-            if (_patients[i].FirstName.ToLower().Contains(lowerQuery) || 
+            if (_patients[i].FirstName.ToLower().Contains(lowerQuery) ||
                 _patients[i].LastName.ToLower().Contains(lowerQuery))
             {
                 matches++;
@@ -53,7 +68,7 @@ public class PatientManager
 
         for (int i = 0; i < _count; i++)
         {
-            if (_patients[i].FirstName.ToLower().Contains(lowerQuery) || 
+            if (_patients[i].FirstName.ToLower().Contains(lowerQuery) ||
                 _patients[i].LastName.ToLower().Contains(lowerQuery))
             {
                 result[index] = _patients[i];
@@ -63,6 +78,32 @@ public class PatientManager
 
         return result;
     }
+
+    // Пошук за точною групою крові (enum == enum)
+    public Patient[] FindByBloodType(BloodType bloodType)
+    {
+        int matches = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (_patients[i].BloodType == bloodType)
+            {
+                matches++;
+            }
+        }
+
+        Patient[] result = new Patient[matches];
+        int index = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (_patients[i].BloodType == bloodType)
+            {
+                result[index] = _patients[i];
+                index++;
+            }
+        }
+        return result;
+    }
+
     public Patient[] GetAll()
     {
         Patient[] copy = new Patient[_count];
@@ -72,7 +113,7 @@ public class PatientManager
         }
         return copy;
     }
-    
+
     // Індексатор: clinic.Patients[0]
     public Patient? this[int index]
     {
@@ -82,7 +123,6 @@ public class PatientManager
             return _patients[index];
         }
     }
-    
 
     public bool Remove(int id)
     {
