@@ -1,9 +1,9 @@
 ﻿using System;
-using ClinicApp;
 using ClinicApp.Enums;
 using ClinicApp.Managers;
 using ClinicApp.Models;
 using ClinicApp.Utils;
+
 namespace ClinicApp;
 
 public class Program
@@ -117,12 +117,10 @@ public class Program
         clinic.Patients.Add(new Patient("Іван", "Іванов", new DateTime(1985, 5, 12), BloodType.APositive, "0501111111"));
         clinic.Patients.Add(new Patient("Анна", "Петрова", new DateTime(1992, 8, 23), BloodType.ONegative, "0502222222"));
 
-        // Book повертає bool, тому ID шукаємо через GetAll().Length
         clinic.Appointments.Book(1, 1, DateTime.Now.AddDays(1).Date.AddHours(10));
         clinic.Appointments.Book(2, 2, DateTime.Now.AddDays(2).Date.AddHours(14));
         clinic.Appointments.Book(1, 3, DateTime.Now.AddDays(-1).Date.AddHours(9));
 
-        // Завершуємо минулий запис — знаходимо його серед усіх
         Appointment[] all = clinic.Appointments.GetAll();
         if (all.Length > 0)
         {
@@ -134,15 +132,31 @@ public class Program
     // ---------- Лікарі ----------
     static void AddDoctorFromMenu(Clinic clinic)
     {
-        string first = ReadString("Ім'я: ");
-        string last  = ReadString("Прізвище: ");
+        try
+        {
+            string first = ReadString("Ім'я: ");
+            string last  = ReadString("Прізвище: ");
 
-        Specialty specialty = ReadSpecialtyFromMenu();
+            Specialty specialty = ReadSpecialtyFromMenu();
 
-        string lic   = ReadString("Номер ліцензії: ");
-        string phone = ReadString("Телефон (10 цифр): ");
+            string lic   = ReadString("Номер ліцензії: ");
+            string phone = ReadString("Телефон (10 цифр): ");
 
-        clinic.Doctors.Add(new Doctor(first, last, specialty, lic, phone));
+            int startHour = ReadInt("Початок роботи (0-23): ");
+            int endHour   = ReadInt("Кінець роботи (1-24): ");
+
+            WorkSchedule schedule = new WorkSchedule(startHour, endHour);
+
+            clinic.Doctors.Add(new Doctor(first, last, specialty, lic, phone, schedule));
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            Console.WriteLine($"Помилка: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            Console.WriteLine($"Помилка: {ex.Message}");
+        }
     }
 
     static Specialty ReadSpecialtyFromMenu()
@@ -186,16 +200,27 @@ public class Program
     // ---------- Пацієнти ----------
     static void AddPatientFromMenu(Clinic clinic)
     {
-        string first = ReadString("Ім'я: ");
-        string last  = ReadString("Прізвище: ");
+        try
+        {
+            string first = ReadString("Ім'я: ");
+            string last  = ReadString("Прізвище: ");
 
-        DateTime dob = ReadDateTime("Дата народження (рррр-мм-дд): ");
+            DateTime dob = ReadDateTime("Дата народження (рррр-мм-дд): ");
 
-        BloodType blood = ReadBloodTypeFromMenu();
+            BloodType blood = ReadBloodTypeFromMenu();
 
-        string phone = ReadString("Телефон (10 цифр): ");
+            string phone = ReadString("Телефон (10 цифр): ");
 
-        clinic.Patients.Add(new Patient(first, last, dob, blood, phone));
+            clinic.Patients.Add(new Patient(first, last, dob, blood, phone));
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            Console.WriteLine($"Помилка: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            Console.WriteLine($"Помилка: {ex.Message}");
+        }
     }
 
     static BloodType ReadBloodTypeFromMenu()
@@ -222,15 +247,28 @@ public class Program
     // ---------- Записи на прийом ----------
     static void CreateAppointmentFromMenu(Clinic clinic)
     {
-        clinic.Patients.DisplayAll();
-        int pid = ReadInt("ID пацієнта: ");
+        try
+        {
+            clinic.Patients.DisplayAll();
+            int pid = ReadInt("ID пацієнта: ");
 
-        clinic.Doctors.DisplayAll();
-        int did = ReadInt("ID лікаря: ");
+            clinic.Doctors.DisplayAll();
+            int did = ReadInt("ID лікаря: ");
 
-        DateTime at = ReadDateTime("Дата і час (рррр-мм-дд гг:хх): ");
+            DateTime at = ReadDateTime("Дата і час (рррр-мм-дд гг:хх): ");
 
-        clinic.Appointments.Book(pid, did, at);
+            int duration = ReadInt("Тривалість (хв): ");
+
+            clinic.Appointments.Book(pid, did, at, duration);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            Console.WriteLine($"Помилка: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            Console.WriteLine($"Помилка: {ex.Message}");
+        }
     }
 
     static void ShowAppointmentsByDate(Clinic clinic)
@@ -385,7 +423,6 @@ public class Program
         Console.WriteLine();
         Console.WriteLine("=== TryFindById (out-параметр) ===");
 
-        // out-параметр не nullable у менеджерах, тому просто викликаємо
         if (clinic.Patients.TryFindById(1, out Patient patient))
         {
             Console.WriteLine("Знайдено пацієнта: " + patient.FullName);

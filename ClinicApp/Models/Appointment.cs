@@ -1,5 +1,6 @@
 ﻿using System;
 using ClinicApp.Enums;
+using ClinicApp.Utils;
 
 namespace ClinicApp.Models
 {
@@ -31,14 +32,13 @@ namespace ClinicApp.Models
             DoctorId = doctorId;
             ScheduledAt = scheduledAt;
 
-            if (durationMinutes <= 0)
-                throw new ArgumentOutOfRangeException(nameof(durationMinutes), "Тривалість має бути додатною.");
+            ClinicValidator.ValidatePositive(durationMinutes, nameof(DurationMinutes));
             _durationMinutes = durationMinutes;
 
             Status = AppointmentStatus.Scheduled;
             Notes = "";
 
-            Id = _nextId++;   // ← В КІНЦІ
+            Id = _nextId++;
         }
 
         public bool Cancel(string reason = "")
