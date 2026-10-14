@@ -1,9 +1,16 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace ClinicApp.Utils
 {
     public static class ClinicValidator
     {
+        // Строго ASCII-цифри, рівно 10. \A і \z — якорі на початок/кінець рядка (без "майже кінця")
+        private static readonly Regex PhonePattern = new Regex(@"\A[0-9]{10}\z");
+
+        // Спрощена перевірка email: щось + @ + щось + . + щось
+        private static readonly Regex EmailPattern = new Regex(@"\A[^@\s]+@[^@\s]+\.[^@\s]+\z");
+
         public static void ValidateName(string value, string fieldName)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -14,14 +21,17 @@ namespace ClinicApp.Utils
 
         public static void ValidatePhone(string phone)
         {
-            if (phone == null || phone.Length != 10)
-                throw new ArgumentException("Телефон має містити рівно 10 цифр.", nameof(phone));
+            if (phone == null || !PhonePattern.IsMatch(phone))
+                throw new ArgumentException("Телефон має містити рівно 10 цифр (лише 0-9).", nameof(phone));
+        }
 
-            for (int i = 0; i < phone.Length; i++)
-            {
-                if (!char.IsDigit(phone[i]))
-                    throw new ArgumentException("Телефон має містити лише цифри.", nameof(phone));
-            }
+        public static void ValidateEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return; // порожній email — «невідомо», дозволено
+
+            if (!EmailPattern.IsMatch(email))
+                throw new ArgumentException("Email має бути у форматі name@domain.tld.", nameof(email));
         }
 
         public static void ValidateDate(DateTime value, string fieldName)

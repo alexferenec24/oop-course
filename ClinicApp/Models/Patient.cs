@@ -12,10 +12,10 @@ namespace ClinicApp.Models
         private string _lastName = "";
         private DateTime _dateOfBirth;
         private string _phone = "";
+        private string _email = "";
 
         public int Id { get; }
         public BloodType BloodType { get; set; }
-        public string Email { get; set; }
 
         public string FirstName
         {
@@ -54,6 +54,16 @@ namespace ClinicApp.Models
             {
                 ClinicValidator.ValidatePhone(value);
                 _phone = value;
+            }
+        }
+
+        public string Email
+        {
+            get => _email;
+            set
+            {
+                ClinicValidator.ValidateEmail(value);
+                _email = value;
             }
         }
 
