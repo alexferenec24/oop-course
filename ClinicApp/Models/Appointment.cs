@@ -27,13 +27,18 @@ namespace ClinicApp.Models
 
         public Appointment(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30)
         {
-            Id = _nextId++;
             PatientId = patientId;
             DoctorId = doctorId;
             ScheduledAt = scheduledAt;
+
+            if (durationMinutes <= 0)
+                throw new ArgumentOutOfRangeException(nameof(durationMinutes), "Тривалість має бути додатною.");
             _durationMinutes = durationMinutes;
+
             Status = AppointmentStatus.Scheduled;
             Notes = "";
+
+            Id = _nextId++;   // ← В КІНЦІ
         }
 
         public bool Cancel(string reason = "")
