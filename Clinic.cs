@@ -11,6 +11,7 @@ public class Clinic
     public DoctorManager Doctors { get; }
     public PatientManager Patients { get; }
     public AppointmentManager Appointments { get; }
+    public MedicalRecordManager MedicalRecords { get; }   // ← ДОДАНО
 
     public Clinic(string name)
     {
@@ -18,6 +19,7 @@ public class Clinic
         Doctors = new DoctorManager();
         Patients = new PatientManager();
         Appointments = new AppointmentManager(Patients, Doctors);
+        MedicalRecords = new MedicalRecordManager();      // ← ДОДАНО
     }
 
     public void GenerateReport()
@@ -26,6 +28,7 @@ public class Clinic
         Console.WriteLine($"Лікарів:      {Doctors.Count}");
         Console.WriteLine($"Пацієнтів:    {Patients.Count}");
         Console.WriteLine($"Записів:      {Appointments.Count}");
+        Console.WriteLine($"Мед. записів: {MedicalRecords.Count}");   // ← ДОДАНО (опційно, для краси)
         Console.WriteLine(new string('=', 50));
     }
 }
