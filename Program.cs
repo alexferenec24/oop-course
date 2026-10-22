@@ -15,31 +15,40 @@ public class Program
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-        Appointment testAppointment = new Appointment(1, 1, DateTime.Today.AddDays(1).AddHours(10));
+        Console.WriteLine("=== Тест Задачі 3 ===");
 
-        ICancellable c = testAppointment;
-        Console.WriteLine(c.IsCancelled);
-        Console.WriteLine(c.CancellationReason);
-        Console.WriteLine(c.Cancel("Лікар захворів"));
-        Console.WriteLine(c.IsCancelled);
-        Console.WriteLine(c.CancellationReason);
-        Console.WriteLine(c.Cancel("Ще раз"));
+        Doctor doctor = new Doctor("Олена", "Коваль", Specialty.Cardiology, "LIC-001", "0671111111", new WorkSchedule(8, 12));
+        ISchedulable s = doctor;
+        Console.WriteLine(s.CanSchedule(new DateTime(2026, 9, 22, 10, 30, 0)));
+        Console.WriteLine(s.CanSchedule(new DateTime(2026, 9, 22, 12, 0, 0)));
 
-        testAppointment.MarkPaid();
-        Console.WriteLine(testAppointment.IsPaid);
-
-        IPayable p = testAppointment;
-        Console.WriteLine(p is ICancellable);
+        DateTime[] slots = s.GetAvailableSlots(new DateTime(2026, 9, 22), 3);
+        for (int i = 0; i < slots.Length; i++)
+        {
+            Console.WriteLine(slots[i].ToString("HH:mm"));
+        }
 
         Clinic clinic = new Clinic("Міська клініка №1");
-
         SeedData(clinic);
+
+        clinic.Appointments.Book(1, 1, DateTime.Today, 30);
+        clinic.Appointments.Book(1, 1, DateTime.Today.AddDays(1), 45);
+        clinic.Appointments.Book(1, 1, DateTime.Today.AddDays(2), 20);
+
+        IPayable[] unpaid = clinic.Billing.GetAllUnpaid();
+        Console.WriteLine(unpaid.Length);
+        Console.WriteLine(clinic.Billing.GetTotalDebt());
+        Console.WriteLine(clinic.Billing.PayAppointment(1));
+        Console.WriteLine(clinic.Billing.PayAppointment(1));
+        Console.WriteLine(clinic.Billing.GetTotalDebt());
+        clinic.Billing.DisplayUnpaid(clinic.Billing.GetAllUnpaid());
+
+        Console.WriteLine("\n=== МЕНЮ ===");
 
         bool running = true;
         while (running)
         {
             Console.WriteLine();
-            Console.WriteLine("=== МЕНЮ ===");
             Console.WriteLine("1.  Показати всіх лікарів");
             Console.WriteLine("2.  Додати лікаря");
             Console.WriteLine("3.  Знайти лікаря за спеціальністю (рядок)");
