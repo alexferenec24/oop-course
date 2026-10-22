@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using ClinicApp.Enums;
+using ClinicApp.Interfaces;
 using ClinicApp.Managers;
 using ClinicApp.Models;
 using ClinicApp.Utils;
@@ -13,6 +14,22 @@ public class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
+        Appointment testAppointment = new Appointment(1, 1, DateTime.Today.AddDays(1).AddHours(10));
+
+        ICancellable c = testAppointment;
+        Console.WriteLine(c.IsCancelled);
+        Console.WriteLine(c.CancellationReason);
+        Console.WriteLine(c.Cancel("Лікар захворів"));
+        Console.WriteLine(c.IsCancelled);
+        Console.WriteLine(c.CancellationReason);
+        Console.WriteLine(c.Cancel("Ще раз"));
+
+        testAppointment.MarkPaid();
+        Console.WriteLine(testAppointment.IsPaid);
+
+        IPayable p = testAppointment;
+        Console.WriteLine(p is ICancellable);
 
         Clinic clinic = new Clinic("Міська клініка №1");
 
@@ -79,9 +96,6 @@ public class Program
         Console.WriteLine("До побачення!");
     }
 
-    // ============================================================
-    // МЕДИЧНА КАРТКА (підменю)
-    // ============================================================
     static void MedicalCardMenu(Clinic clinic)
     {
         bool inMenu = true;
@@ -218,8 +232,6 @@ public class Program
         clinic.MedicalRecords.DisplayList(records);
     }
 
-    // ---------- Допоміжні методи введення ----------
-
     static string ReadString(string prompt)
     {
         Console.Write(prompt);
@@ -262,19 +274,15 @@ public class Program
         }
     }
 
-    // ---------- Початкові дані ----------
     static void SeedData(Clinic clinic)
     {
-        // Лікарі (ID 1, 2, 3)
         clinic.Doctors.Add(new Doctor("Олена", "Коваль", Specialty.Cardiology, "LIC-001", "0671111111"));
         clinic.Doctors.Add(new Doctor("Ігор", "Петренко", Specialty.Neurology, "LIC-002", "0672222222"));
         clinic.Doctors.Add(new Doctor("Марія", "Сидоренко", Specialty.Pediatrics, "LIC-003", "0673333333"));
 
-        // Пацієнти (ID 1, 2)
         clinic.Patients.Add(new Patient("Іван", "Іванов", new DateTime(1985, 5, 12), BloodType.APositive, "0501111111"));
         clinic.Patients.Add(new Patient("Анна", "Петрова", new DateTime(1992, 8, 23), BloodType.ONegative, "0502222222"));
 
-        // Записи на прийом
         clinic.Appointments.Book(1, 1, DateTime.Now.AddDays(1).Date.AddHours(10));
         clinic.Appointments.Book(2, 2, DateTime.Now.AddDays(2).Date.AddHours(14));
         clinic.Appointments.Book(1, 3, DateTime.Now.AddDays(-1).Date.AddHours(9));
@@ -286,44 +294,31 @@ public class Program
             clinic.Appointments.Complete(last.Id);
         }
 
-        // ============================================================
-        // МЕДИЧНІ ЗАПИСИ (Лаба 6, Задача 4 — тестові дані)
-        // ============================================================
-
-        // #1 діагноз I10, хронічний, 30 днів тому
         clinic.MedicalRecords.Add(new Diagnosis(1, 1, DateTime.Today.AddDays(-30),
             "I10", "Гіпертонічна хвороба", isChronic: true));
 
-        // #1 діагноз J06.9, гострий, 5 днів тому
         clinic.MedicalRecords.Add(new Diagnosis(1, 1, DateTime.Today.AddDays(-5),
             "J06.9", "Гострий ринофарингіт"));
 
-        // #1 аналіз «Гемоглобін» — в нормі
         clinic.MedicalRecords.Add(new LabResult(1, 1, DateTime.Today,
             "Гемоглобін", 145, "г/л", "120-160", isNormal: true));
 
-        // #1 аналіз «Холестерин» — поза нормою
         clinic.MedicalRecords.Add(new LabResult(1, 1, DateTime.Today,
             "Холестерин", 6.2, "ммоль/л", "< 5.2", isNormal: false));
 
-        // #1 рецепт «Лізиноприл», 30 днів, виписаний 5 днів тому → активний
         clinic.MedicalRecords.Add(new Prescription(1, 1, DateTime.Today.AddDays(-5),
             "Лізиноприл", "10 мг", 30, "1 раз на добу вранці"));
 
-        // #2 рецепт, 10 днів, виписаний 40 днів тому → НЕ активний
         clinic.MedicalRecords.Add(new Prescription(2, 2, DateTime.Today.AddDays(-40),
             "Аспірин", "100 мг", 10, ""));
 
-        // #2 діагноз (демонструє різних пацієнтів)
         clinic.MedicalRecords.Add(new Diagnosis(2, 2, DateTime.Today.AddDays(-10),
             "K29.7", "Гастрит"));
 
-        // #3 аналіз (демонструє різних лікарів)
         clinic.MedicalRecords.Add(new LabResult(1, 3, DateTime.Today.AddDays(-2),
             "Глюкоза", 5.4, "ммоль/л", "3.9-5.5", isNormal: true));
     }
 
-    // ---------- Лікарі ----------
     static void AddDoctorFromMenu(Clinic clinic)
     {
         try
@@ -391,7 +386,6 @@ public class Program
         }
     }
 
-    // ---------- Пацієнти ----------
     static void AddPatientFromMenu(Clinic clinic)
     {
         try
@@ -438,7 +432,6 @@ public class Program
         }
     }
 
-    // ---------- Записи на прийом ----------
     static void CreateAppointmentFromMenu(Clinic clinic)
     {
         try
@@ -522,7 +515,6 @@ public class Program
         }
     }
 
-    // ---------- Демонстрації ----------
     static void DemoClinicFormatter()
     {
         Console.WriteLine("=== ClinicFormatter ===");

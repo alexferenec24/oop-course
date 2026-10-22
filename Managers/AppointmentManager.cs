@@ -1,6 +1,7 @@
 ﻿using System;
 using ClinicApp.Models;
 using ClinicApp.Enums;
+using ClinicApp.Interfaces;
 
 namespace ClinicApp.Managers;
 
@@ -63,7 +64,6 @@ public class AppointmentManager
         return null;
     }
 
-    // Індексатор: clinic.Appointments[2]
     public Appointment? this[int index]
     {
         get
@@ -91,6 +91,19 @@ public class AppointmentManager
             return appointment.Complete();
         }
         return false;
+    }
+
+    public static int CancelAll(ICancellable[] items, string reason = "")
+    {
+        int cancelledCount = 0;
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i].Cancel(reason))
+            {
+                cancelledCount++;
+            }
+        }
+        return cancelledCount;
     }
 
     public Appointment[] GetByPatient(int patientId)
@@ -135,7 +148,6 @@ public class AppointmentManager
         return result;
     }
 
-    // Перевантаження 1: за DateTime
     public Appointment[] GetByDate(DateTime date)
     {
         int matches = 0;
@@ -157,7 +169,6 @@ public class AppointmentManager
         return result;
     }
 
-    // Перевантаження 2: три числа — не дублює логіку, а конструює DateTime
     public Appointment[] GetByDate(int year, int month, int day)
     {
         return GetByDate(new DateTime(year, month, day));

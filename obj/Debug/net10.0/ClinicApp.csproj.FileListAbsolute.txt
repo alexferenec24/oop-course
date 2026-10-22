@@ -12,3 +12,4 @@ C:\Users\Саша\RiderProjects\oop-courssee\ClinicApp\obj\Debug\net10.0\refint\
 C:\Users\Саша\RiderProjects\oop-courssee\ClinicApp\obj\Debug\net10.0\ClinicApp.pdb
 C:\Users\Саша\RiderProjects\oop-courssee\ClinicApp\obj\Debug\net10.0\ClinicApp.genruntimeconfig.cache
 C:\Users\Саша\RiderProjects\oop-courssee\ClinicApp\obj\Debug\net10.0\ref\ClinicApp.dll
+C:\Users\Саша\RiderProjects\oop-courssee\ClinicApp\obj\Debug\net10.0\ClinicApp.sourcelink.json
