@@ -24,13 +24,9 @@ namespace ClinicApp.Models
         }
 
         public bool IsPaid => _isPaid;
-
         public bool IsCancelled => Status == AppointmentStatus.Cancelled;
-
         public string CancellationReason => IsCancelled ? Notes : "";
-
         public DateTime EndsAt => ScheduledAt.AddMinutes(DurationMinutes);
-
         public bool IsUpcoming => ScheduledAt > DateTime.Now && Status == AppointmentStatus.Scheduled;
 
         public Appointment(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30)
@@ -49,9 +45,19 @@ namespace ClinicApp.Models
             Id = _nextId++;
         }
 
-        public decimal GetCost()
+        public virtual decimal GetCost()
         {
             return DurationMinutes * 10m;
+        }
+
+        public virtual string GetDescription()
+        {
+            return "Прийом";
+        }
+
+        public int GetPriority()
+        {
+            return 3;
         }
 
         public void MarkPaid()
@@ -88,14 +94,7 @@ namespace ClinicApp.Models
 
         public override string ToString()
         {
-            string result = $"[{Id}] Пацієнт #{PatientId} -> Лікар #{DoctorId} | {ScheduledAt:dd.MM.yyyy HH:mm}-{EndsAt:HH:mm} | {Status}";
-
-            if (Notes.Length > 0)
-            {
-                result += $" | {Notes}";
-            }
-
-            return result;
+            return $"[{Id}] {GetDescription()} | Пацієнт #{PatientId} → Лікар #{DoctorId} | {ScheduledAt:dd.MM.yyyy HH:mm}-{EndsAt:HH:mm} | {Status} | {GetCost().ToString("F2")} грн";
         }
     }
 }
