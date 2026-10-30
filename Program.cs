@@ -411,17 +411,30 @@ public class Program
         clinic.MedicalRecords.Add(new LabResult(1, 3, DateTime.Today.AddDays(-2), "Глюкоза", 5.4, "ммоль/л", "3.9-5.5", isNormal: true));
 
         DateTime tomorrow = DateTime.Today.AddDays(1);
-        Appointment[] list =
-        {
-            new RegularAppointment(1, 1, tomorrow.AddHours(10)),
-            new UrgentAppointment(2, 2, tomorrow.AddHours(11), "біль у грудях"),
-            new SpecialistAppointment(3, 3, tomorrow.AddHours(12), "кардіологія", 60)
-        };
+        clinic.Appointments.Book(1, 1, tomorrow.AddHours(10), 30);
+        clinic.Appointments.BookUrgent(2, 2, tomorrow.AddHours(11), "біль у грудях", 30);
+        clinic.Appointments.BookSpecialist(1, 3, tomorrow.AddHours(12), "кардіологія", 60);
 
-        for (int i = 0; i < list.Length; i++)
-        {
-            Console.WriteLine(list[i]);
-        }
+        Console.WriteLine("\n=== new vs override ===");
+        UrgentAppointment urgent = new UrgentAppointment(1, 1, tomorrow, "тест");
+        
+        Appointment asBase = urgent;
+        Console.WriteLine($"Через Appointment:     {asBase.GetDescription()} | пріоритет {asBase.GetPriority()}");
+        
+        UrgentAppointment asUrgent = urgent;
+        Console.WriteLine($"Через UrgentAppointment: {asUrgent.GetDescription()} | пріоритет {asUrgent.GetPriority()}");
+
+        // 1. Чому GetDescription() через змінну типу Appointment дає опис термінового прийому?
+        // Відповідь: Тому що GetDescription() оголошений як virtual у базовому класі Appointment, а в UrgentAppointment він перевизначений через override. 
+        // При виклику віртуального методу через базовий тип викликається реалізація з реального об'єкта (UrgentAppointment) — це поліморфізм.
+
+        // 2. Чому GetPriority() через ту саму змінну повертає 3, хоча об'єкт — UrgentAppointment?
+        // Відповідь: Тому що GetPriority() НЕ є віртуальним (у нього немає слова virtual). 
+        // У UrgentAppointment він прихований через 'new', тому компілятор обирає метод залежно від типу змінної, а не реального об'єкта.
+
+        // 3. Що треба змінити в Appointment і UrgentAppointment, щоб GetPriority() теж працював поліморфно?
+        // Відповідь: У Appointment додати слово virtual до GetPriority(). 
+        // У UrgentAppointment замінити 'new' на 'override' і додати слово override до GetPriority().
     }
 
     static void AddDoctorFromMenu(Clinic clinic)
