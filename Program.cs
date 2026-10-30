@@ -120,6 +120,7 @@ public class Program
             Console.WriteLine("6. Скасувати запис");
             Console.WriteLine("7. Завершити запис");
             Console.WriteLine("8. Скасувати всі записи пацієнта");
+            Console.WriteLine("9. За типом прийому");
             Console.WriteLine("0. Назад");
             Console.Write("Оберіть: ");
 
@@ -134,9 +135,27 @@ public class Program
                 case "6": CancelAppointmentFromMenu(clinic); break;
                 case "7": CompleteAppointmentFromMenu(clinic); break;
                 case "8": CancelAllPatientAppointments(clinic); break;
+                case "9": ShowAppointmentsByType(clinic); break;
                 case "0": inMenu = false; break;
                 default: Console.WriteLine("Невірний вибір."); break;
             }
+        }
+    }
+
+    static void ShowAppointmentsByType(Clinic clinic)
+    {
+        Console.WriteLine("1. Термінові");
+        Console.WriteLine("2. Консультації спеціаліста");
+        Console.WriteLine("3. Звичайні");
+        Console.Write("Оберіть: ");
+        string? choice = Console.ReadLine();
+
+        switch (choice)
+        {
+            case "1": clinic.Appointments.DisplayList(clinic.Appointments.GetUrgent()); break;
+            case "2": clinic.Appointments.DisplayList(clinic.Appointments.GetSpecialist()); break;
+            case "3": clinic.Appointments.DisplayList(clinic.Appointments.GetRegular()); break;
+            default: Console.WriteLine("Невірний вибір."); break;
         }
     }
 
@@ -414,27 +433,6 @@ public class Program
         clinic.Appointments.Book(1, 1, tomorrow.AddHours(10), 30);
         clinic.Appointments.BookUrgent(2, 2, tomorrow.AddHours(11), "біль у грудях", 30);
         clinic.Appointments.BookSpecialist(1, 3, tomorrow.AddHours(12), "кардіологія", 60);
-
-        Console.WriteLine("\n=== new vs override ===");
-        UrgentAppointment urgent = new UrgentAppointment(1, 1, tomorrow, "тест");
-        
-        Appointment asBase = urgent;
-        Console.WriteLine($"Через Appointment:     {asBase.GetDescription()} | пріоритет {asBase.GetPriority()}");
-        
-        UrgentAppointment asUrgent = urgent;
-        Console.WriteLine($"Через UrgentAppointment: {asUrgent.GetDescription()} | пріоритет {asUrgent.GetPriority()}");
-
-        // 1. Чому GetDescription() через змінну типу Appointment дає опис термінового прийому?
-        // Відповідь: Тому що GetDescription() оголошений як virtual у базовому класі Appointment, а в UrgentAppointment він перевизначений через override. 
-        // При виклику віртуального методу через базовий тип викликається реалізація з реального об'єкта (UrgentAppointment) — це поліморфізм.
-
-        // 2. Чому GetPriority() через ту саму змінну повертає 3, хоча об'єкт — UrgentAppointment?
-        // Відповідь: Тому що GetPriority() НЕ є віртуальним (у нього немає слова virtual). 
-        // У UrgentAppointment він прихований через 'new', тому компілятор обирає метод залежно від типу змінної, а не реального об'єкта.
-
-        // 3. Що треба змінити в Appointment і UrgentAppointment, щоб GetPriority() теж працював поліморфно?
-        // Відповідь: У Appointment додати слово virtual до GetPriority(). 
-        // У UrgentAppointment замінити 'new' на 'override' і додати слово override до GetPriority().
     }
 
     static void AddDoctorFromMenu(Clinic clinic)
