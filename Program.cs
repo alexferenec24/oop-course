@@ -120,6 +120,7 @@ public class Program
             Console.WriteLine("6. Скасувати запис");
             Console.WriteLine("7. Завершити запис");
             Console.WriteLine("8. Скасувати всі записи пацієнта");
+            Console.WriteLine("9. За типом прийому");
             Console.WriteLine("0. Назад");
             Console.Write("Оберіть: ");
 
@@ -134,9 +135,27 @@ public class Program
                 case "6": CancelAppointmentFromMenu(clinic); break;
                 case "7": CompleteAppointmentFromMenu(clinic); break;
                 case "8": CancelAllPatientAppointments(clinic); break;
+                case "9": ShowAppointmentsByType(clinic); break;
                 case "0": inMenu = false; break;
                 default: Console.WriteLine("Невірний вибір."); break;
             }
+        }
+    }
+
+    static void ShowAppointmentsByType(Clinic clinic)
+    {
+        Console.WriteLine("1. Термінові");
+        Console.WriteLine("2. Консультації спеціаліста");
+        Console.WriteLine("3. Звичайні");
+        Console.Write("Оберіть: ");
+        string? choice = Console.ReadLine();
+
+        switch (choice)
+        {
+            case "1": clinic.Appointments.DisplayList(clinic.Appointments.GetUrgent()); break;
+            case "2": clinic.Appointments.DisplayList(clinic.Appointments.GetSpecialist()); break;
+            case "3": clinic.Appointments.DisplayList(clinic.Appointments.GetRegular()); break;
+            default: Console.WriteLine("Невірний вибір."); break;
         }
     }
 
@@ -409,6 +428,20 @@ public class Program
         clinic.MedicalRecords.Add(new Prescription(2, 2, DateTime.Today.AddDays(-40), "Аспірин", "100 мг", 10, ""));
         clinic.MedicalRecords.Add(new Diagnosis(2, 2, DateTime.Today.AddDays(-10), "K29.7", "Гастрит"));
         clinic.MedicalRecords.Add(new LabResult(1, 3, DateTime.Today.AddDays(-2), "Глюкоза", 5.4, "ммоль/л", "3.9-5.5", isNormal: true));
+
+        DateTime tomorrow = DateTime.Today.AddDays(1);
+        clinic.Appointments.Book(1, 1, tomorrow.AddHours(10), 30);
+        clinic.Appointments.BookUrgent(2, 2, tomorrow.AddHours(11), "біль у грудях", 30);
+        clinic.Appointments.BookSpecialist(1, 3, tomorrow.AddHours(12), "кардіологія", 60);
+
+        var regularVip = new RegularAppointment(1, 1, tomorrow.AddHours(13)) { DiscountMultiplier = 0.8m };
+        var urgentVip = new UrgentAppointment(1, 1, tomorrow.AddHours(14), "тест") { DiscountMultiplier = 0.8m };
+        var specialistVip = new SpecialistAppointment(1, 1, tomorrow.AddHours(15), "тест") { DiscountMultiplier = 0.8m };
+
+        Console.WriteLine("\n=== VIP-знижка (-20%) ===");
+        Console.WriteLine($"{regularVip.GetDescription()}: {regularVip.GetCost():F2} грн");
+        Console.WriteLine($"{urgentVip.GetDescription()}: {urgentVip.GetCost():F2} грн");
+        Console.WriteLine($"{specialistVip.GetDescription()}: {specialistVip.GetCost():F2} грн");
     }
 
     static void AddDoctorFromMenu(Clinic clinic)

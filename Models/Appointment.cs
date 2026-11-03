@@ -2,7 +2,10 @@
 using ClinicApp.Enums;
 using ClinicApp.Interfaces;
 using ClinicApp.Utils;
-
+// Обрано Варіант А (множник знижки в базовому класі Appointment).
+// Це найпростіший підхід, який не вимагає створення нових класів для кожного тарифу.
+// Він повністю відповідає принципу "відкритий для розширення, закритий для змін" (Open/Closed):
+// щоб додати новий тип знижки, ми просто змінюємо значення DiscountMultiplier, не чіпаючи логіку нащадків.
 namespace ClinicApp.Models
 {
     public class Appointment : IPayable, ICancellable
@@ -24,14 +27,12 @@ namespace ClinicApp.Models
         }
 
         public bool IsPaid => _isPaid;
-
         public bool IsCancelled => Status == AppointmentStatus.Cancelled;
-
         public string CancellationReason => IsCancelled ? Notes : "";
-
         public DateTime EndsAt => ScheduledAt.AddMinutes(DurationMinutes);
-
         public bool IsUpcoming => ScheduledAt > DateTime.Now && Status == AppointmentStatus.Scheduled;
+        
+        public decimal DiscountMultiplier { get; set; } = 1m;
 
         public Appointment(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30)
         {
@@ -49,9 +50,19 @@ namespace ClinicApp.Models
             Id = _nextId++;
         }
 
-        public decimal GetCost()
+        public virtual decimal GetCost()
         {
-            return DurationMinutes * 10m;
+            return DurationMinutes * 10m * DiscountMultiplier;
+        }
+
+        public virtual string GetDescription()
+        {
+            return "Прийом";
+        }
+
+        public int GetPriority()
+        {
+            return 3;
         }
 
         public void MarkPaid()
@@ -88,14 +99,7 @@ namespace ClinicApp.Models
 
         public override string ToString()
         {
-            string result = $"[{Id}] Пацієнт #{PatientId} -> Лікар #{DoctorId} | {ScheduledAt:dd.MM.yyyy HH:mm}-{EndsAt:HH:mm} | {Status}";
-
-            if (Notes.Length > 0)
-            {
-                result += $" | {Notes}";
-            }
-
-            return result;
+            return $"[{Id}] {GetDescription()} | Пацієнт #{PatientId} → Лікар #{DoctorId} | {ScheduledAt:dd.MM.yyyy HH:mm}-{EndsAt:HH:mm} | {Status} | {GetCost().ToString("F2")} грн";
         }
     }
 }
