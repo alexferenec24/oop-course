@@ -433,6 +433,15 @@ public class Program
         clinic.Appointments.Book(1, 1, tomorrow.AddHours(10), 30);
         clinic.Appointments.BookUrgent(2, 2, tomorrow.AddHours(11), "біль у грудях", 30);
         clinic.Appointments.BookSpecialist(1, 3, tomorrow.AddHours(12), "кардіологія", 60);
+
+        var regularVip = new RegularAppointment(1, 1, tomorrow.AddHours(13)) { DiscountMultiplier = 0.8m };
+        var urgentVip = new UrgentAppointment(1, 1, tomorrow.AddHours(14), "тест") { DiscountMultiplier = 0.8m };
+        var specialistVip = new SpecialistAppointment(1, 1, tomorrow.AddHours(15), "тест") { DiscountMultiplier = 0.8m };
+
+        Console.WriteLine("\n=== VIP-знижка (-20%) ===");
+        Console.WriteLine($"{regularVip.GetDescription()}: {regularVip.GetCost():F2} грн");
+        Console.WriteLine($"{urgentVip.GetDescription()}: {urgentVip.GetCost():F2} грн");
+        Console.WriteLine($"{specialistVip.GetDescription()}: {specialistVip.GetCost():F2} грн");
     }
 
     static void AddDoctorFromMenu(Clinic clinic)
