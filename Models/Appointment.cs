@@ -2,13 +2,10 @@
 using ClinicApp.Enums;
 using ClinicApp.Interfaces;
 using ClinicApp.Utils;
-// Обрано Варіант А (множник знижки в базовому класі Appointment).
-// Це найпростіший підхід, який не вимагає створення нових класів для кожного тарифу.
-// Він повністю відповідає принципу "відкритий для розширення, закритий для змін" (Open/Closed):
-// щоб додати новий тип знижки, ми просто змінюємо значення DiscountMultiplier, не чіпаючи логіку нащадків.
+
 namespace ClinicApp.Models
 {
-    public class Appointment : IPayable, ICancellable
+    public class Appointment : IPayable, ICancellable, IIdentifiable
     {
         private static int _nextId = 1;
         private int _durationMinutes;
