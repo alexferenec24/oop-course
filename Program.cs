@@ -30,7 +30,8 @@ public class Program
             Console.WriteLine("│ 3. Записи        - прийоми, скасування       │");
             Console.WriteLine("│ 4. Медична картка- діагнози, рецепти         │");
             Console.WriteLine("│ 5. Рахунки       - оплата, борги             │");
-            Console.WriteLine("│ 6. Звіт          - загальна статистика       │");
+            Console.WriteLine("│ 6. Черга         - очікування, прийом        │");
+            Console.WriteLine("│ 7. Звіт          - загальна статистика       │");
             Console.WriteLine("│ 0. Вихід                                     │");
             Console.WriteLine("└──────────────────────────────────────────────┘");
             Console.Write("Оберіть розділ: ");
@@ -45,13 +46,85 @@ public class Program
                 case "3": AppointmentsMenu(clinic); break;
                 case "4": MedicalCardMenu(clinic); break;
                 case "5": BillingMenu(clinic); break;
-                case "6": clinic.GenerateReport(); break;
+                case "6": WaitingRoomMenu(clinic); break;
+                case "7": clinic.GenerateReport(); break;
                 case "0": running = false; break;
                 default: Console.WriteLine("Невірний вибір."); break;
             }
         }
 
         Console.WriteLine("До побачення!");
+    }
+
+    static void WaitingRoomMenu(Clinic clinic)
+    {
+        bool inMenu = true;
+        while (inMenu)
+        {
+            Console.WriteLine("\n--- Черга ---");
+            Console.WriteLine("1. Додати пацієнта до черги");
+            Console.WriteLine("2. Прийняти першого");
+            Console.WriteLine("3. Хто перший?");
+            Console.WriteLine("4. Переглянути всю чергу");
+            Console.WriteLine("0. Назад");
+            Console.Write("Оберіть: ");
+
+            string? choice = Console.ReadLine();
+            switch (choice)
+            {
+                case "1":
+                    int id = ReadInt("ID пацієнта: ");
+                    Patient? patient = clinic.Patients.FindById(id);
+                    if (patient != null)
+                    {
+                        clinic.WaitingRoom.Enqueue(patient);
+                        Console.WriteLine($"Пацієнта {patient.FullName} додано до черги.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Пацієнта не знайдено.");
+                    }
+                    break;
+                case "2":
+                    try
+                    {
+                        Patient p = clinic.WaitingRoom.Dequeue();
+                        Console.WriteLine($"Прийнято: {p.FullName}. У черзі залишилось: {clinic.WaitingRoom.Count}");
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Console.WriteLine($"Помилка: {ex.Message}");
+                    }
+                    break;
+                case "3":
+                    try
+                    {
+                        Patient p = clinic.WaitingRoom.Peek();
+                        Console.WriteLine($"Перший у черзі: {p.FullName}");
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Console.WriteLine($"Помилка: {ex.Message}");
+                    }
+                    break;
+                case "4":
+                    Patient[] queue = clinic.WaitingRoom.ToArray();
+                    if (queue.Length == 0)
+                    {
+                        Console.WriteLine("Черга порожня.");
+                    }
+                    else
+                    {
+                        for (int i = 0; i < queue.Length; i++)
+                        {
+                            Console.WriteLine($"{i + 1}. {queue[i].FullName}");
+                        }
+                    }
+                    break;
+                case "0": inMenu = false; break;
+                default: Console.WriteLine("Невірний вибір."); break;
+            }
+        }
     }
 
     static void PatientsMenu(Clinic clinic)
