@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Globalization;
+using System.Collections.Generic;
+using ClinicApp.Comparators;
 using ClinicApp.Enums;
 using ClinicApp.Interfaces;
 using ClinicApp.Managers;
@@ -32,6 +34,7 @@ public class Program
             Console.WriteLine("│ 5. Рахунки       - оплата, борги             │");
             Console.WriteLine("│ 6. Черга         - очікування, прийом        │");
             Console.WriteLine("│ 7. Звіт          - загальна статистика       │");
+            Console.WriteLine("│ 8. Аналітика     - звіти та рейтинги         │");
             Console.WriteLine("│ 0. Вихід                                     │");
             Console.WriteLine("└──────────────────────────────────────────────┘");
             Console.Write("Оберіть розділ: ");
@@ -48,12 +51,81 @@ public class Program
                 case "5": BillingMenu(clinic); break;
                 case "6": WaitingRoomMenu(clinic); break;
                 case "7": clinic.GenerateReport(); break;
+                case "8": AnalyticsMenu(clinic); break;
                 case "0": running = false; break;
                 default: Console.WriteLine("Невірний вибір."); break;
             }
         }
 
         Console.WriteLine("До побачення!");
+    }
+
+    static void AnalyticsMenu(Clinic clinic)
+    {
+        bool inMenu = true;
+        while (inMenu)
+        {
+            Console.WriteLine("\n--- Аналітика ---");
+            Console.WriteLine("1. Лікарі за навантаженням");
+            Console.WriteLine("2. Лікарі за виручкою");
+            Console.WriteLine("3. Лікарі за іменем");
+            Console.WriteLine("4. Пацієнти за кількістю візитів");
+            Console.WriteLine("5. Пацієнти за витратами");
+            Console.WriteLine("0. Назад");
+            Console.Write("Оберіть: ");
+
+            string? choice = Console.ReadLine();
+            switch (choice)
+            {
+                case "1":
+                    List<DoctorStats> docLoad = CollectDoctorStats(clinic);
+                    docLoad.Sort();
+                    foreach (var s in docLoad) Console.WriteLine(s);
+                    break;
+                case "2":
+                    List<DoctorStats> docRev = CollectDoctorStats(clinic);
+                    docRev.Sort(new DoctorStatsByRevenue());
+                    foreach (var s in docRev) Console.WriteLine(s);
+                    break;
+                case "3":
+                    List<DoctorStats> docName = CollectDoctorStats(clinic);
+                    docName.Sort(new DoctorStatsByName());
+                    foreach (var s in docName) Console.WriteLine(s);
+                    break;
+                case "4":
+                    List<PatientStats> patVisits = CollectPatientStats(clinic);
+                    patVisits.Sort();
+                    foreach (var s in patVisits) Console.WriteLine(s);
+                    break;
+                case "5":
+                    List<PatientStats> patSpent = CollectPatientStats(clinic);
+                    patSpent.Sort(new PatientStatsBySpent());
+                    foreach (var s in patSpent) Console.WriteLine(s);
+                    break;
+                case "0": inMenu = false; break;
+                default: Console.WriteLine("Невірний вибір."); break;
+            }
+        }
+    }
+
+    static List<DoctorStats> CollectDoctorStats(Clinic clinic)
+    {
+        List<DoctorStats> result = new List<DoctorStats>();
+        foreach (var stat in clinic.Analytics.ComputeDoctorStats())
+        {
+            result.Add(stat);
+        }
+        return result;
+    }
+
+    static List<PatientStats> CollectPatientStats(Clinic clinic)
+    {
+        List<PatientStats> result = new List<PatientStats>();
+        foreach (var stat in clinic.Analytics.ComputePatientStats())
+        {
+            result.Add(stat);
+        }
+        return result;
     }
 
     static void WaitingRoomMenu(Clinic clinic)
